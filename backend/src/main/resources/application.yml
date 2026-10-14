@@ -1,0 +1,25 @@
+spring:
+  application:
+    name: techconsulting-tickets
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/tickets}
+    username: ${DB_USER:tickets}
+    password: ${DB_PASSWORD:}
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+  jackson:
+    deserialization:
+      fail-on-unknown-properties: true
+server:
+  address: ${SERVER_ADDRESS:127.0.0.1}
+  port: ${SERVER_PORT:8080}
+  error:
+    include-message: never
+    include-stacktrace: never
+app:
+  jwt-secret: ${JWT_SECRET:}
+  demo:
+    enabled: false
+  cors-origin: ${CORS_ORIGIN:http://localhost:5173}
