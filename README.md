@@ -45,6 +45,26 @@ Ejecuta el frontend en otra terminal. Docker publica PostgreSQL en 55432, sin in
 
 Para usar tu propio PostgreSQL, configura DB_URL, DB_USER y DB_PASSWORD en .env. El usuario necesita permisos de creación de tablas en una base dedicada. Configura también JWT_SECRET con al menos 32 bytes. El arranque normal requiere este secreto y no crea cuentas de prueba automáticamente.
 
+## Arranque directo desde terminal (sin scripts)
+
+Spring Boot carga automáticamente el archivo `.env` de la raíz al ejecutar desde `backend` o desde la raíz del proyecto. El archivo utiliza líneas `CLAVE=valor` sin comillas ni instrucciones `export`. Las variables del entorno conservan prioridad; si quedaron valores antiguos en la terminal, abre una terminal nueva.
+
+Con JDK 21 activo y PostgreSQL iniciado:
+
+```powershell
+cd C:\PROY_SA\Integrador\sistema_tickets_app\backend
+.\mvnw.cmd spring-boot:run
+```
+
+Si el contenedor está detenido, desde la raíz ejecuta antes `docker compose -p tickets-apf3 up -d --wait`. En otra terminal, entra a `frontend` y ejecuta `npm.cmd run dev`.
+
+Si Maven utiliza otro JDK, configura Java 21 en esa terminal:
+
+```powershell
+$env:JAVA_HOME = 'C:\Program Files\Java\jdk-21'
+$env:Path = "$env:JAVA_HOME\bin;$env:Path"
+```
+
 ## Cuentas ficticias de demostración
 
 Todas utilizan la contraseña **Demo2026!**, únicamente en demo o con SeedDemo:

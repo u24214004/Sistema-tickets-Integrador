@@ -1,8 +1,10 @@
 spring:
+  config:
+    import: "optional:file:../.env[.properties],optional:file:./.env[.properties]"
   application:
     name: techconsulting-tickets
   datasource:
-    url: ${DB_URL:jdbc:postgresql://localhost:5432/tickets}
+    url: ${DB_URL:jdbc:postgresql://localhost:55432/tickets}
     username: ${DB_USER:tickets}
     password: ${DB_PASSWORD:}
   jpa:
