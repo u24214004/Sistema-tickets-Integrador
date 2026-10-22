@@ -45,3 +45,48 @@ export async function request<T>(
     );
   return body as T;
 }
+
+export async function downloadReport(
+  path: string,
+  token: string,
+): Promise<void> {
+  let response: Response;
+  try {
+    response = await fetch(`/api${path}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+  } catch {
+    throw new ApiError(
+      "No pudimos conectar con el servicio. Inténtalo nuevamente.",
+      0,
+    );
+  }
+  if (!response.ok) {
+    const problem = await response.json().catch(() => ({}));
+    throw new ApiError(
+      problem.message ?? "No se pudo generar el reporte.",
+      response.status,
+    );
+  }
+  const file = await response.blob();
+  if (
+    file.type !==
+    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+  ) {
+    throw new ApiError(
+      "El servicio no devolvió un archivo Excel válido.",
+      response.status,
+    );
+  }
+  const url = URL.createObjectURL(file);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = "tickets.xlsx";
+  document.body.append(link);
+  try {
+    link.click();
+  } finally {
+    link.remove();
+    window.setTimeout(() => URL.revokeObjectURL(url), 0);
+  }
+}

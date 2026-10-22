@@ -11,6 +11,7 @@ import {
   type Severity,
 } from "../types";
 import TicketForm from "./TicketForm";
+import ReportDownloadButton from "./ReportDownloadButton";
 import { Sidebar, Topbar } from "./WorkspaceChrome";
 import TicketStats from "./TicketStats";
 import TicketDetail from "./TicketDetail";
@@ -135,13 +136,22 @@ export default function Dashboard({
                   Consulta el detalle de cada incidencia.
                 </span>
               </div>
-              <button
-                className="secondary"
-                onClick={() => setRefresh((value) => value + 1)}
-                disabled={pending}
-              >
-                Actualizar
-              </button>
+              <div className="panel-actions">
+                <ReportDownloadButton
+                  token={session.token}
+                  status={status}
+                  severity={severity}
+                  onError={setError}
+                  onExpired={onExpired}
+                />
+                <button
+                  className="secondary"
+                  onClick={() => setRefresh((value) => value + 1)}
+                  disabled={pending}
+                >
+                  Actualizar
+                </button>
+              </div>
             </div>
             <div className="filters">
               <div>

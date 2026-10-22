@@ -12,6 +12,7 @@ Primer incremento del APF3 del curso Integrador I, UTP. Implementa acceso y gest
 - Aislamiento de empresas en el backend; el cliente no elige otra empresa.
 - Registro del evento de creación dentro de la misma transacción.
 - Migraciones Flyway, Logback con rotación y Commons Lang para normalización.
+- Exportación Excel de tickets con Apache POI y resúmenes preparados con Guava.
 
 ## Tecnologías
 
@@ -64,6 +65,18 @@ Si Maven utiliza otro JDK, configura Java 21 en esa terminal:
 $env:JAVA_HOME = 'C:\Program Files\Java\jdk-21'
 $env:Path = "$env:JAVA_HOME\bin;$env:Path"
 ```
+
+## Exportar tickets a Excel (POI + Guava)
+
+En la bandeja pulsa **Exportar Excel**. El archivo `tickets.xlsx` contiene detalle de tickets y una hoja de resumen por estado y severidad. Respeta los filtros activos, incluye todas las páginas y mantiene los permisos de cada empresa. El máximo predeterminado es 5000 tickets: si se excede, se pide filtrar, sin truncar el archivo.
+
+- Apache POI 5.5.1 crea y permite verificar el `.xlsx`, con cabeceras, filtros, fechas y fórmulas evaluadas.
+- Guava 33.7.2-jre agrupa los tickets mediante `Multimaps.index` / `ImmutableListMultimap`, crea una colección inmutable y mide duración con `Stopwatch`.
+- Logback registra identificador del actor, número de registros y tiempo de generación en `backend/logs/tickets.log`.
+
+El endpoint autenticado es `GET /api/reports/tickets.xlsx`, con parámetros opcionales `status` y `severity`. Es un reporte operativo; la liquidación de horas sigue pendiente. No se necesitan cambios en las tablas.
+
+Consulta [la guía de las librerías para APF3](REPORTES_APF3.md) para las evidencias de sustentación. Reinicia el backend después de actualizar las dependencias.
 
 ## Cuentas ficticias de demostración
 
