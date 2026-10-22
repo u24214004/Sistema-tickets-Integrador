@@ -49,6 +49,15 @@ public class TicketService {
         var pageable=PageRequest.of(page,size,Sort.by(Sort.Direction.DESC,"createdAt","id"));
         return TicketDtos.PageView.of(tickets.findAll(scope(actor,status,severity),pageable));
     }
+    public java.util.List<TicketDtos.View> reportRows(AppUser actor,TicketStatus status,Severity severity,int limit) {
+        var page=PageRequest.of(0,limit+1,Sort.by(Sort.Direction.DESC,"createdAt","id"));
+        var rows=tickets.findAll(scope(actor,status,severity),page).getContent();
+        if(rows.size()>limit) {
+            throw new ApiException(HttpStatus.PAYLOAD_TOO_LARGE,
+                "El reporte supera el límite de "+limit+" tickets. Aplica filtros para reducir los resultados.");
+        }
+        return rows.stream().map(TicketDtos.View::of).toList();
+    }
     public TicketDtos.Summary summary(AppUser actor) {
         return new TicketDtos.Summary(tickets.count(scope(actor,null,null)),
             tickets.count(scope(actor,TicketStatus.ABIERTO,null)),

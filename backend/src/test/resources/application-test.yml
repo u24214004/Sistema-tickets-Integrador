@@ -4,5 +4,6 @@ spring:
     username: sa
     password: ''
 app:
+  jwt-secret: "test-only-signing-key-not-for-production-32-bytes"
   demo:
     enabled: true
