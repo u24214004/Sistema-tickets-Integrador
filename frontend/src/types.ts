@@ -47,6 +47,13 @@ export interface CreateTicket {
   severity: Severity;
   companyId?: number;
 }
+export interface UpdateTicket {
+  title: string;
+  description: string;
+  severity: Severity;
+  status: TicketStatus;
+  companyId?: number;
+}
 export const severityLabels: Record<Severity, string> = {
   CRITICA: "Crítica",
   ALTA: "Alta",

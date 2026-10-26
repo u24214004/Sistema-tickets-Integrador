@@ -1,8 +1,20 @@
 package pe.edu.utp.tickets.ticket;
 import java.time.Instant;
 import java.time.ZoneId;
-import jakarta.persistence.*;
+
 import org.apache.commons.lang3.StringUtils;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 import pe.edu.utp.tickets.auth.AppUser;
 import pe.edu.utp.tickets.company.Company;
 @Entity @Table(name="tickets")
@@ -30,4 +42,11 @@ public class Ticket {
     public Severity getSeverity() { return severity; }
     public TicketStatus getStatus() { return status; }
     public Instant getCreatedAt() { return createdAt; }
+    public void update(Company company, String title, String description, Severity severity, TicketStatus status) {
+        this.company = company;
+        this.title = StringUtils.normalizeSpace(title);
+        this.description = StringUtils.strip(description);
+        this.severity = severity;
+        this.status = status;
+    }
 }
