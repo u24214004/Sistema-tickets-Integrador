@@ -38,6 +38,27 @@ public class TicketService {
         log.info("Ticket creado id={} empresa_id={} actor_id={}",ticket.getId(),companyId,actor.getId());
         return TicketDtos.View.of(ticket);
     }
+    @Transactional
+    public TicketDtos.View update(AppUser actor,long id,TicketDtos.UpdateRequest request) {
+        Ticket ticket=tickets.findById(id).orElseThrow(TicketService::notFound);
+        if (actor.getRole()==Role.CLIENTE && !Objects.equals(actor.getCompany().getId(),ticket.getCompany().getId()))
+            throw notFound();
+        Long companyId = request.companyId() != null ? request.companyId() : ticket.getCompany().getId();
+        if (actor.getRole()==Role.CLIENTE) {
+            if (!Objects.equals(companyId, actor.getCompany().getId()))
+                throw new ApiException(HttpStatus.FORBIDDEN,"Solo puedes editar tickets de tu empresa");
+        } else {
+            if (companyId==null) throw new ApiException(HttpStatus.BAD_REQUEST,"Selecciona una empresa");
+        }
+        Company company = ticket.getCompany();
+        if (actor.getRole()!=Role.CLIENTE) {
+            company = companies.findById(companyId)
+                .orElseThrow(() -> new ApiException(HttpStatus.BAD_REQUEST,"Empresa no disponible"));
+        }
+        ticket.update(company,request.title(),request.description(),request.severity(),request.status());
+        log.info("Ticket actualizado id={} empresa_id={} actor_id={} status={}",ticket.getId(),company.getId(),actor.getId(),request.status());
+        return TicketDtos.View.of(ticket);
+    }
     public TicketDtos.View detail(AppUser actor,long id) {
         Ticket ticket=tickets.findById(id).orElseThrow(TicketService::notFound);
         if (actor.getRole()==Role.CLIENTE && !Objects.equals(actor.getCompany().getId(),ticket.getCompany().getId()))

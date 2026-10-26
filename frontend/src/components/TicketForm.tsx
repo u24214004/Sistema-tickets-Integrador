@@ -2,28 +2,37 @@ import { useEffect, useState, type FormEvent } from "react";
 import { ApiError, request } from "../api";
 import {
   severityLabels,
+  statusLabels,
   type Company,
   type Session,
   type Ticket,
   type Severity,
+  type TicketStatus,
   type CreateTicket,
+  type UpdateTicket,
 } from "../types";
 import Modal from "./Modal";
 export default function TicketForm({
   session,
   onClose,
-  onCreated,
+  onSaved,
   onExpired,
+  ticket,
 }: {
   session: Session;
   onClose: () => void;
-  onCreated: (ticket: Ticket) => void;
+  onSaved: (ticket: Ticket, isEdit: boolean) => void;
   onExpired: () => void;
+  ticket?: Ticket;
 }) {
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [severity, setSeverity] = useState<Severity>("MEDIA");
-  const [companyId, setCompanyId] = useState("");
+  const isEdit = Boolean(ticket);
+  const [title, setTitle] = useState(ticket?.title ?? "");
+  const [description, setDescription] = useState(ticket?.description ?? "");
+  const [severity, setSeverity] = useState<Severity>(ticket?.severity ?? "MEDIA");
+  const [status, setStatus] = useState<TicketStatus>(ticket?.status ?? "ABIERTO");
+  const [companyId, setCompanyId] = useState(
+    ticket ? String(ticket.companyId) : "",
+  );
   const [companies, setCompanies] = useState<Company[]>([]);
   const [loadingCompanies, setLoadingCompanies] = useState(
     session.user.role === "INTERNO",
@@ -51,6 +60,14 @@ export default function TicketForm({
       active = false;
     };
   }, [session, onExpired]);
+  useEffect(() => {
+    if (!ticket) return;
+    setTitle(ticket.title);
+    setDescription(ticket.description);
+    setSeverity(ticket.severity);
+    setStatus(ticket.status);
+    setCompanyId(String(ticket.companyId));
+  }, [ticket]);
   const submit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setError("");
@@ -60,18 +77,26 @@ export default function TicketForm({
       return;
     }
     setPending(true);
-    const data: CreateTicket = {
+    const data: CreateTicket | UpdateTicket = {
       title: title.trim(),
       description: description.trim(),
       severity,
+      ...(isEdit ? { status } : {}),
     };
-    if (session.user.role === "INTERNO") data.companyId = Number(companyId);
+    if (session.user.role === "INTERNO") {
+      data.companyId = Number(companyId);
+    } else if (session.user.companyId) {
+      data.companyId = session.user.companyId;
+    }
     try {
-      onCreated(
-        await request<Ticket>("/tickets", session.token, {
-          method: "POST",
+      const method = isEdit ? "PUT" : "POST";
+      const endpoint = isEdit && ticket ? `/tickets/${ticket.id}` : "/tickets";
+      onSaved(
+        await request<Ticket>(endpoint, session.token, {
+          method,
           body: JSON.stringify(data),
         }),
+        isEdit,
       );
     } catch (failure) {
       const problem = failure as ApiError;
@@ -86,14 +111,16 @@ export default function TicketForm({
   };
   return (
     <Modal
-      title="Nueva solicitud de soporte"
+      title={isEdit ? "Editar solicitud de soporte" : "Nueva solicitud de soporte"}
       onClose={() => {
         if (!pending) onClose();
       }}
     >
       <form className="ticket-form" onSubmit={submit}>
         <p className="muted">
-          Describe la incidencia para que el equipo pueda atenderla.
+          {isEdit
+            ? "Actualiza los datos de la incidencia y guarda los cambios."
+            : "Describe la incidencia para que el equipo pueda atenderla."}
         </p>
         {session.user.role === "INTERNO" ? (
           <>
@@ -164,6 +191,23 @@ export default function TicketForm({
             </option>
           ))}
         </select>
+        {isEdit ? (
+          <>
+            <label htmlFor="status">Estado</label>
+            <select
+              id="status"
+              value={status}
+              disabled={pending}
+              onChange={(e) => setStatus(e.target.value as TicketStatus)}
+            >
+              {Object.entries(statusLabels).map(([value, label]) => (
+                <option key={value} value={value}>
+                  {label}
+                </option>
+              ))}
+            </select>
+          </>
+        ) : null}
         {error ? (
           <div className="error" role="alert">
             {error}
@@ -179,7 +223,13 @@ export default function TicketForm({
             Cancelar
           </button>
           <button className="primary" disabled={pending || loadingCompanies}>
-            {pending ? "Creando…" : "Crear ticket"}
+            {pending
+              ? isEdit
+                ? "Guardando…"
+                : "Creando…"
+              : isEdit
+                ? "Guardar cambios"
+                : "Crear ticket"}
           </button>
         </div>
       </form>

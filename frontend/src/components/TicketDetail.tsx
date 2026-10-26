@@ -8,9 +8,11 @@ import Modal from "./Modal";
 export default function TicketDetail({
   ticket,
   onClose,
+  onEdit,
 }: {
   ticket: Ticket;
   onClose: () => void;
+  onEdit: (ticket: Ticket) => void;
 }) {
   return (
     <Modal title={ticket.code} onClose={onClose}>
@@ -42,6 +44,9 @@ export default function TicketDetail({
         <div className="modal-actions">
           <button className="secondary" onClick={onClose}>
             Volver a la bandeja
+          </button>
+          <button className="primary" onClick={() => onEdit(ticket)}>
+            Editar
           </button>
         </div>
       </div>

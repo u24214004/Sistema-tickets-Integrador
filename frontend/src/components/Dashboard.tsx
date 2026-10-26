@@ -34,6 +34,7 @@ export default function Dashboard({
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
   const [creating, setCreating] = useState(false);
+  const [editing, setEditing] = useState<Ticket | null>(null);
   const [detail, setDetail] = useState<Ticket | null>(null);
   const [refresh, setRefresh] = useState(0);
   useEffect(() => {
@@ -78,13 +79,17 @@ export default function Dashboard({
       else setError(problem.message);
     }
   };
-  const created = useCallback((ticket: Ticket) => {
+  const saved = useCallback((ticket: Ticket, isEdit: boolean) => {
     setCreating(false);
-    setNotice(`Ticket ${ticket.code} creado correctamente.`);
+    setEditing(null);
+    setNotice(
+      `Ticket ${ticket.code} ${isEdit ? "actualizado" : "creado"} correctamente.`,
+    );
     setPage(0);
     setStatus("");
     setSeverity("");
     setRefresh((value) => value + 1);
+    if (isEdit) setDetail(ticket);
   }, []);
   return (
     <div className="app-layout">
@@ -209,16 +214,27 @@ export default function Dashboard({
           </footer>
         </main>
       </div>
-      {creating ? (
+      {creating || editing ? (
         <TicketForm
           session={session}
-          onClose={() => setCreating(false)}
-          onCreated={created}
+          ticket={editing ?? undefined}
+          onClose={() => {
+            setCreating(false);
+            setEditing(null);
+          }}
+          onSaved={saved}
           onExpired={onExpired}
         />
       ) : null}
-      {detail ? (
-        <TicketDetail ticket={detail} onClose={() => setDetail(null)} />
+      {detail && !editing ? (
+        <TicketDetail
+          ticket={detail}
+          onClose={() => setDetail(null)}
+          onEdit={(ticket) => {
+            setDetail(null);
+            setEditing(ticket);
+          }}
+        />
       ) : null}
     </div>
   );
