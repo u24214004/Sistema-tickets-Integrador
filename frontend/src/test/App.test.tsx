@@ -103,6 +103,7 @@ describe("Acceso a la mesa de servicio", () => {
       title: ticket.title,
       description: ticket.description,
       severity: "ALTA",
+      companyId: 1,
     });
   });
 });
