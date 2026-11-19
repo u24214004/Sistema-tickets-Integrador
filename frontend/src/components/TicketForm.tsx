@@ -28,8 +28,12 @@ export default function TicketForm({
   const isEdit = Boolean(ticket);
   const [title, setTitle] = useState(ticket?.title ?? "");
   const [description, setDescription] = useState(ticket?.description ?? "");
-  const [severity, setSeverity] = useState<Severity>(ticket?.severity ?? "MEDIA");
-  const [status, setStatus] = useState<TicketStatus>(ticket?.status ?? "ABIERTO");
+  const [severity, setSeverity] = useState<Severity>(
+    ticket?.severity ?? "MEDIA",
+  );
+  const [status, setStatus] = useState<TicketStatus>(
+    ticket?.status ?? "ABIERTO",
+  );
   const [companyId, setCompanyId] = useState(
     ticket ? String(ticket.companyId) : "",
   );
@@ -111,7 +115,9 @@ export default function TicketForm({
   };
   return (
     <Modal
-      title={isEdit ? "Editar solicitud de soporte" : "Nueva solicitud de soporte"}
+      title={
+        isEdit ? "Editar solicitud de soporte" : "Nueva solicitud de soporte"
+      }
       onClose={() => {
         if (!pending) onClose();
       }}

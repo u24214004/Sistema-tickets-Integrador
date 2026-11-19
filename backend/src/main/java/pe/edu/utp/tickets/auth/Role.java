@@ -1,2 +1,6 @@
 package pe.edu.utp.tickets.auth;
-public enum Role { INTERNO, CLIENTE }
+
+public enum Role {
+    INTERNO,
+    CLIENTE
+}
